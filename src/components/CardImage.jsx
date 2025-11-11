@@ -83,7 +83,7 @@ function CardImage({ cardId }) {
       <img
         src={card.large}
         alt={`Carte Pokémon: ${card.name}`}
-        className="w-full h-auto rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-transform cursor-pointer"
+        className="w-full h-auto bg-transparent hover:scale-105 transition-transform cursor-pointer"
         onError={(e) => {
           e.target.src = 'https://via.placeholder.com/300x400?text=Image+indisponible';
         }}
