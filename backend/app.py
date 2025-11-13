@@ -1,18 +1,24 @@
 from flask import Flask, jsonify
 from flask_cors import CORS # N'oubliez pas l'importation de CORS pour la connexion React
-from flask_sqlalchemy import SQLAlchemy
-from models.Card import Card
-from models.Set import Set
+from extensions import db
 
 # Initialiser l'application Flask
 app = Flask(__name__)
 # Activer CORS pour permettre les requêtes depuis React (localhost:3000)
-CORS(app) 
+CORS(app)
 
 # --- Configuration de la Base de Données (SQLite) ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cardpokdex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app) 
+# Initialise l'extension SQLAlchemy avec l'app
+db.init_app(app)
+# Importe les modèles après l'initialisation de `db`
+from models.Card import Card
+from models.Set import Set
+
+# Crée les tables si nécessaire
+with app.app_context():
+    db.create_all()
 # ----------------------------------------------------
 
 
