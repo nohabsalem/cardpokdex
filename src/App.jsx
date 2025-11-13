@@ -1,14 +1,20 @@
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+import ApiTest from "./components/ApiTest.jsx";
+import CardImage from "./components/CardImage.jsx";
+import SetImage from "./components/SetImage.jsx";
 
 export default function App() {
   return (
     <div>
       <Header />
-      <main className="p-4 min-h-screen bg-white">
-        <h1 className="text-4xl">Corps de page</h1>
-        <p>BLABLA</p>
+      <main>
+        {/* Section des Cartes */}
+        <section>
+            <CardImage cardId="rsv10pt5-1" />
+        </section>
       </main>
+      <ApiTest />
       <Footer />
     </div>
   );
