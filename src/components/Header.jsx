@@ -1,10 +1,13 @@
 import logo from "../assets/img/logo.png"; // chemin relatif depuis src/components
-
+import { Link } from "react-router-dom";
 function Header() {
   return (
     <header className="flex justify-between items-center p-4 bg-gray-400">
       <div>
-        <img src={logo} alt="Logo" className="h-16 w-auto" />
+        <Link to="/">
+          {" "}
+          <img src={logo} alt="Logo" className="h-16 w-auto" />
+        </Link>
       </div>
 
       <div>
