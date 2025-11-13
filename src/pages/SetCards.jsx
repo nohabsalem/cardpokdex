@@ -16,16 +16,39 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedAlt, setSelectedAlt] = useState('');
+  const [setName, setSetName] = useState('');
+  const API = 'http://127.0.0.1:5000/api';
 
   // Reload when the prop changes (router navigation) or when setId state changes
   useEffect(() => {
     // If parent passes a setId prop, keep state in sync
     if (propSetId && propSetId !== setId) {
       setSetId(propSetId);
+
     }
     loadCards();
+    fetchSetInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propSetId, setId]);
+
+  const fetchSetInfo = async () => {
+    if (!setId) {
+      setSetName('');
+      return;
+    }
+    try {
+      const resp = await fetch(`${API}/set/${setId}`);
+      if (!resp.ok) {
+        setSetName(setId);
+        return;
+      }
+      const data = await resp.json();
+      setSetName(data.name || setId);
+    } catch (err) {
+      console.error(err);
+      setSetName(setId);
+    }
+  };
 
   const loadCards = async () => {
     if (!setId) return;
@@ -68,7 +91,7 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
               >
                 ← Retour aux sets
               </button>
-              <span className="text-sm text-gray-700">{cards.length} carte(s) pour le set <strong>{setId}</strong></span>
+              <span className="text-sm text-gray-700">{cards.length} carte(s) pour le set <strong>{setName || setId}</strong></span>
             </div>
             <div>
               {loading && <p>Chargement des cartes...</p>}

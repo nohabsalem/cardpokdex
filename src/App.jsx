@@ -38,7 +38,7 @@ export default function App() {
   } else if (path.startsWith('/sets/')) {
     const parts = path.split('/');
     const setId = parts[2] || '';
-    content = <SetCards setId={setId} navigateTo={navigateTo} />;
+    content = <SetCards setId={setId} navigateTo={navigateTo}/>;
   } else {
     // fallback to sets list
     content = <SetsList navigateTo={navigateTo} />;
