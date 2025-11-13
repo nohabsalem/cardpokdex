@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import ImageModal from '../components/ImageModal';
+import React, { useState, useEffect } from "react";
+import ImageModal from "../components/ImageModal";
 
 /**
  * SetCards Page
@@ -8,23 +8,26 @@ import ImageModal from '../components/ImageModal';
  * - Saisie d'un `setId` (ex: rsv10pt5) puis clique sur "Charger" pour afficher
  * - Récupère toutes les cartes via /api/cards puis filtre côté client
  */
-export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, navigateTo }) {
+export default function SetCards({
+  initialSetId = "rsv10pt5",
+  setId: propSetId,
+  navigateTo,
+}) {
   const [setId, setSetId] = useState(propSetId || initialSetId);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedAlt, setSelectedAlt] = useState('');
-  const [setName, setSetName] = useState('');
-  const API = 'http://127.0.0.1:5000/api';
+  const [selectedAlt, setSelectedAlt] = useState("");
+  const [setName, setSetName] = useState("");
+  const API = "http://127.0.0.1:5000/api";
 
   // Reload when the prop changes (router navigation) or when setId state changes
   useEffect(() => {
     // If parent passes a setId prop, keep state in sync
     if (propSetId && propSetId !== setId) {
       setSetId(propSetId);
-
     }
     loadCards();
     fetchSetInfo();
@@ -33,7 +36,7 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
 
   const fetchSetInfo = async () => {
     if (!setId) {
-      setSetName('');
+      setSetName("");
       return;
     }
     try {
@@ -56,7 +59,7 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
     setError(null);
 
     try {
-      const resp = await fetch('http://127.0.0.1:5000/api/cards');
+      const resp = await fetch("http://127.0.0.1:5000/api/cards");
       if (!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
       const data = await resp.json();
 
@@ -74,7 +77,7 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
       setCards(filtered);
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Erreur lors du chargement des cartes');
+      setError(err.message || "Erreur lors du chargement des cartes");
     } finally {
       setLoading(false);
     }
@@ -82,22 +85,28 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <button
-                onClick={() => (typeof navigateTo === 'function' ? navigateTo('/sets') : (window.location.pathname = '/sets'))}
-                className="text-sm text-gray-600 hover:text-gray-800 mr-4"
-              >
-                ← Retour aux sets
-              </button>
-              <span className="text-sm text-gray-700">{cards.length} carte(s) pour le set <strong>{setName || setId}</strong></span>
-            </div>
-            <div>
-              {loading && <p>Chargement des cartes...</p>}
-              {error && <p className="text-red-600">{error}</p>}
-            </div>
-          </div>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <button
+            onClick={() =>
+              typeof navigateTo === "function"
+                ? navigateTo("/sets")
+                : (window.location.pathname = "/sets")
+            }
+            className="text-sm text-gray-600 hover:text-gray-800 mr-4 cursor-pointer"
+          >
+            ← Retour aux sets
+          </button>
+          <span className="text-sm text-gray-700">
+            {cards.length} carte(s) pour le set{" "}
+            <strong>{setName || setId}</strong>
+          </span>
+        </div>
+        <div>
+          {loading && <p>Chargement des cartes...</p>}
+          {error && <p className="text-red-600">{error}</p>}
+        </div>
+      </div>
 
       {/* Grille: 5 colonnes sur large, responsive */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -107,7 +116,10 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
               src={c.small || c.large}
               alt={c.name}
               className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-transform hover:scale-105 cursor-pointer"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/240x320?text=Image+indisponible'; }}
+              onError={(e) => {
+                e.target.src =
+                  "https://via.placeholder.com/240x320?text=Image+indisponible";
+              }}
               onClick={() => {
                 // open modal with the large image if available
                 const large = c.large || c.small;
@@ -121,7 +133,12 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
         ))}
       </div>
 
-      <ImageModal open={modalOpen} src={selectedImage} alt={selectedAlt} onClose={() => setModalOpen(false)} />
+      <ImageModal
+        open={modalOpen}
+        src={selectedImage}
+        alt={selectedAlt}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   );
 }
