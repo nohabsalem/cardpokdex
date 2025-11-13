@@ -12,12 +12,13 @@ function SearchBar({
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState([]);
 	const [selectedCardId, setSelectedCardId] = useState(null);
-	const [loading, setLoading] = useState(false);
+
 	const [error, setError] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const debounceRef = useRef(null);
 	const abortRef = useRef(null);
+
 	const containerRef = useRef(null);
 
 	// Fetch/search effect (debounced)
@@ -27,14 +28,12 @@ function SearchBar({
 				abortRef.current.abort();
 				abortRef.current = null;
 			}
-			setLoading(false);
 			setError(null);
 			setResults([]);
 			onResults([]);
 			return;
 		}
 
-		setLoading(true);
 		setError(null);
 
 		if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -66,14 +65,12 @@ function SearchBar({
 					});
 				})
 				.then((data) => {
-					setLoading(false);
 					setError(null);
 					setResults(data || []);
 					onResults(data || []);
 				})
 				.catch((err) => {
 					if (err.name === "AbortError") return;
-					setLoading(false);
 					setError(err.message || "Erreur");
 					onResults([]);
 				});
@@ -134,18 +131,39 @@ function SearchBar({
 					aria-label="Search"
 					style={{ padding: "8px 10px", borderRadius: 6, border: "1px solid #ccc", minWidth: 220 }}
 					onFocus={() => setIsOpen(true)}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							e.preventDefault();
+							if (query && query.length >= minChars) {
+								try {
+									window.history.pushState({}, '', `/search?q=${encodeURIComponent(query)}`);
+								} catch (err) {
+									// ignore
+								}
+								// trigger router listener (App listens to popstate)
+								try {
+									window.dispatchEvent(new PopStateEvent('popstate'));
+								} catch (err) {
+									// fallback: reload
+									window.location.href = `/search?q=${encodeURIComponent(query)}`;
+								}
+								// keep the popup open so the results remain visible without extra clicks
+								setIsOpen(true);
+							}
+						}
+					}}
 				/>
-				{loading && (
-					<span aria-live="polite" style={{ fontSize: 12, color: "#666" }}>
-						Chargement...
-					</span>
-				)}
+			</div>
+
+			{/* Erreur affichée sous la barre de recherche (le texte 'Chargement...' a été supprimé) */}
+			<div style={{ marginTop: 6 }}>
 				{error && (
-					<span role="alert" style={{ fontSize: 12, color: "#c00" }}>
+					<div role="alert" style={{ fontSize: 12, color: "#c00" }}>
 						{error}
-					</span>
+					</div>
 				)}
 			</div>
+		
 
 			{/* Popup résultats */}
 			{isOpen && (
@@ -174,21 +192,10 @@ function SearchBar({
 						<ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
 							{results.slice(0, 50).map((r) => (
 								<li key={r.id} style={{ margin: "6px 0", padding: 6, borderRadius: 6 }}>
-									<a
-										href={`#/card/${encodeURIComponent(r.id)}`}
-										onClick={() => {
-											try {
-												globalThis.location.hash = `#/card/${encodeURIComponent(r.id)}`;
-											} catch (e) {
-												globalThis.location.href = `#/card/${encodeURIComponent(r.id)}`;
-											}
-											setIsOpen(false);
-										}}
-										style={{ color: "#0366d6", textDecoration: "none" }}
-									>
+									<div style={{ color: "#222" }}>
 										<strong>{r.name}</strong>
-									</a>
-									<div style={{ fontSize: 12, color: "#444" }}>{r.set_id || r.set}</div>
+									</div>
+									<div style={{ fontSize: 12, color: "#444" }}>{r.id}</div>
 								</li>
 							))}
 						</ul>
@@ -214,8 +221,8 @@ function SearchBar({
 					<CardImage cardId={selectedCardId} />
 				</section>
 			)}
-		</div>
-	);
+			</div>
+		);
 }
 
 export default SearchBar;
