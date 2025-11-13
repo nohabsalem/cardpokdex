@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CardModal from './CardDetails';
+import ImageModal from './ImageModal';
 
 /**
  * CardImage Component
@@ -11,6 +12,7 @@ function CardImage({ cardId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     // Si l'ID est manquant, on ne fait rien
@@ -39,8 +41,8 @@ function CardImage({ cardId }) {
 
         const data = await response.json();
 
-        // Valide que les données nécessaires sont présentes
-        if (!data.small || !data.name) {
+        // Valide que les données nécessaires sont présentes (small ou large)
+        if (!(data.large || data.small) || !data.name) {
           throw new Error('Données de carte invalides');
         }
 
@@ -79,7 +81,10 @@ function CardImage({ cardId }) {
     return null;
   }
 
-  // Affichage de l'image uniquement
+  // Affichage de l'image uniquement (utilise small comme vignette si disponible)
+  const thumb = card.small || card.large;
+  const largeImage = card.large || card.small;
+
   return (
     <div className="flex justify-center">
       <button
@@ -99,6 +104,19 @@ function CardImage({ cardId }) {
       </button>
 
       {showModal && <CardModal card={card} onClose={() => setShowModal(false)} />}
+      <img
+        src={thumb}
+        alt={`Carte Pokémon: ${card.name}`}
+        className="w-full h-auto bg-transparent hover:scale-105 transition-transform cursor-pointer"
+        onError={(e) => {
+          e.target.src = 'https://via.placeholder.com/300x400?text=Image+indisponible';
+        }}
+        onClick={() => {
+          console.log(`CardImage: ouverture modal pour ${card.id}`);
+          setOpen(true);
+        }}
+      />
+      <ImageModal open={open} src={largeImage} alt={card.name} onClose={() => setOpen(false)} />
     </div>
   );
 }
