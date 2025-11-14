@@ -1,24 +1,6 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
 
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-
-CORS(app) 
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cardpokdex.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app) 
-
-# --- Modèle de la Table 'cards' ---
+from extensions import db
 class Card(db.Model):
-    # La colonne `id` de la table SQL est longue (512), on la garde ainsi
-    # On ajoute une colonne id auto-incrémentée si on veut une clé primaire simple, 
-    # mais ici on utilise l'ID de la carte comme clé primaire car il est unique.
-    
-    # ID de la carte (Clé Primaire)
     id = db.Column(db.String(512), primary_key=True) 
     name = db.Column(db.String(512))
     supertype = db.Column(db.String(512))
@@ -30,7 +12,6 @@ class Card(db.Model):
     small = db.Column(db.String(512))
     large = db.Column(db.String(512))
 
-    # Clé étrangère: relie la carte à son set (colonne 'set_id')
     set_id = db.Column(db.String(20), db.ForeignKey('set.id'), nullable=False)
     
     def to_dict(self):

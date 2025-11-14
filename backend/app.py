@@ -1,18 +1,24 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS # N'oubliez pas l'importation de CORS pour la connexion React
-from flask_sqlalchemy import SQLAlchemy
-from models.Card import Card
-from models.Set import Set
+from extensions import db
 
 # Initialiser l'application Flask
 app = Flask(__name__)
 # Activer CORS pour permettre les requêtes depuis React (localhost:3000)
-CORS(app) 
+CORS(app)
 
 # --- Configuration de la Base de Données (SQLite) ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cardpokdex.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app) 
+# Initialise l'extension SQLAlchemy avec l'app
+db.init_app(app)
+# Importe les modèles après l'initialisation de `db`
+from models.Card import Card
+from models.Set import Set
+
+# Crée les tables si nécessaire
+with app.app_context():
+    db.create_all()
 # ----------------------------------------------------
 
 
@@ -46,6 +52,26 @@ def get_card_details(card_id):
         
     # Renvoie les données au format JSON
     return jsonify(card.to_dict())
+
+
+@app.route('/api/search', methods=['GET'])
+def search_cards():
+    """Recherche basique des cartes par nom via le paramètre de query `q`.
+    Renvoie une liste JSON des cartes correspondantes.
+    Exemple: GET /api/search?q=pikachu
+    """
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify([])
+
+    # Recherche case-insensitive dans le champ name
+    try:
+        results = Card.query.filter(Card.name.ilike(f"%{q}%")).all()
+    except Exception:
+        # En cas d'erreur (par ex. colonne manquante), renvoyer une liste vide
+        results = []
+
+    return jsonify([card.to_dict() for card in results])
 
 @app.route('/api/set/<string:set_id>', methods=['GET'])
 def get_set_details(set_id):

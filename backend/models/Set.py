@@ -1,18 +1,4 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
-
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-
-CORS(app) 
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cardpokdex.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app) 
-
-
+from extensions import db
 class Set(db.Model):
     id = db.Column(db.String(20), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
