@@ -55,7 +55,6 @@ export default function App() {
           {content}
         </section>
       </main>
-      <ApiTest />
       <Footer />
     </div>
   );

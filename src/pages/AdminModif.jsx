@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function AdminModif() {
 	const [isAdmin, setIsAdmin] = useState(false);
@@ -13,6 +14,7 @@ export default function AdminModif() {
 
 	const [editingItem, setEditingItem] = useState(null);
 	const [message, setMessage] = useState("");
+	const [newItem, setNewItem] = useState({});
 
 	const API = "http://localhost:5000/api";
 
@@ -137,6 +139,36 @@ export default function AdminModif() {
 		}
 	}
 
+	async function handleAddItem(e) {
+		e.preventDefault();
+		try {
+			// Génère un ID automatiquement si aucun ID n'est fourni
+			if (!newItem.id || newItem.id.trim() === '') {
+				newItem.id = uuidv4();
+			}
+
+			console.log('Nouvel élément à ajouter :', newItem); // Ajout d'un log pour vérifier les données
+
+			const url = mode === 'cards' ? `${API}/card/add` : `${API}/set/add`;
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(newItem)
+			});
+			const data = await res.json();
+			if (!res.ok) {
+				setMessage(data.message || 'Erreur lors de l\'ajout');
+				return;
+			}
+			setMessage(data.message || 'Ajout réussi');
+			setNewItem({});
+			await fetchAll();
+		} catch (e) {
+			console.error(e);
+			setMessage('Erreur réseau lors de l\'ajout');
+		}
+	}
+
 	return (
 		<div style={{ padding: 20 }}>
 			<h2>Administration</h2>
@@ -200,6 +232,14 @@ export default function AdminModif() {
 										<div>
 											<label>Rareté</label>
 											<input style={inputStyle} value={editingItem.rarity || ''} onChange={e => setEditingItem({ ...editingItem, rarity: e.target.value })} />
+										</div>
+										<div>
+											<label>Type</label>
+											<input style={inputStyle} value={editingItem.type || ''} onChange={e => setEditingItem({ ...editingItem, type: e.target.value })} />
+										</div>
+										<div>
+											<label>Flavor Text</label>
+											<textarea style={inputStyle} value={editingItem.flavorText || ''} onChange={e => setEditingItem({ ...editingItem, flavorText: e.target.value })} />
 										</div>
 										<div>
 											<label>Set ID</label>
@@ -266,9 +306,128 @@ export default function AdminModif() {
 							</div>
 						)}
 					</div>
+
+					<div style={{ marginTop: 20 }}>
+						<h3>Ajouter {mode === 'cards' ? 'une Carte' : 'un Set'}</h3>
+						<form onSubmit={handleAddItem} style={{ border: '1px solid #ccc', padding: 12, maxWidth: 720 }}>
+							{mode === 'cards' ? (
+								<>
+									<div>
+										<label>Nom</label>
+										<input
+											style={inputStyle}
+											value={newItem.name || ''}
+											onChange={e => setNewItem({ ...newItem, name: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Numéro</label>
+										<input
+											style={inputStyle}
+											value={newItem.number || ''}
+											onChange={e => setNewItem({ ...newItem, number: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Artiste</label>
+										<input
+											style={inputStyle}
+											value={newItem.artist || ''}
+											onChange={e => setNewItem({ ...newItem, artist: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Rareté</label>
+										<input
+											style={inputStyle}
+											value={newItem.rarity || ''}
+											onChange={e => setNewItem({ ...newItem, rarity: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Type</label>
+										<input
+											style={inputStyle}
+											value={newItem.type || ''}
+											onChange={e => setNewItem({ ...newItem, type: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Flavor Text</label>
+										<textarea
+											style={inputStyle}
+											value={newItem.flavorText || ''}
+											onChange={e => setNewItem({ ...newItem, flavorText: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Set ID</label>
+										<input
+											style={inputStyle}
+											value={newItem.set_id || ''}
+											onChange={e => setNewItem({ ...newItem, set_id: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>ID</label>
+										<input
+											style={inputStyle}
+											value={newItem.id || ''}
+											onChange={e => setNewItem({ ...newItem, id: e.target.value })}
+										/>
+									</div>
+								</>
+							) : (
+								<>
+									<div>
+										<label>Nom</label>
+										<input
+											style={inputStyle}
+											value={newItem.name || ''}
+											onChange={e => setNewItem({ ...newItem, name: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Série</label>
+										<input
+											style={inputStyle}
+											value={newItem.series || ''}
+											onChange={e => setNewItem({ ...newItem, series: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Total</label>
+										<input
+											style={inputStyle}
+											value={newItem.total || ''}
+											onChange={e => setNewItem({ ...newItem, total: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>Date de sortie</label>
+										<input
+											style={inputStyle}
+											value={newItem.releaseDate || ''}
+											onChange={e => setNewItem({ ...newItem, releaseDate: e.target.value })}
+										/>
+									</div>
+									<div>
+										<label>ID</label>
+										<input
+											style={inputStyle}
+											value={newItem.id || ''}
+											onChange={e => setNewItem({ ...newItem, id: e.target.value })}
+										/>
+									</div>
+								</>
+							)}
+							<div style={{ marginTop: 8 }}>
+								<button type="submit">Ajouter</button>
+							</div>
+						</form>
+					</div>
 				</div>
 			)}
 		</div>
 	);
 }
-    

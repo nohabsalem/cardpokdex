@@ -30,7 +30,7 @@ function SearchBar({
 			}
 			setError(null);
 			setResults([]);
-			onResults([]);
+			onResults([]); // Assurez-vous que cette fonction est stable (mémorisée avec useCallback)
 			return;
 		}
 
@@ -67,29 +67,32 @@ function SearchBar({
 				.then((data) => {
 					setError(null);
 					setResults(data || []);
-					onResults(data || []);
+					onResults(data || []); // Assurez-vous que cette fonction est stable
 				})
 				.catch((err) => {
 					if (err.name === "AbortError") return;
 					setError(err.message || "Erreur");
-					onResults([]);
+					onResults([]); // Assurez-vous que cette fonction est stable
 				});
 		}, debounceMs);
 
 		return () => {
 			if (debounceRef.current) clearTimeout(debounceRef.current);
 		};
-	}, [query, endpoint, paramName, minChars, debounceMs, onResults]);
+	}, [query, endpoint, paramName, minChars, debounceMs]); // Supprimé `onResults` des dépendances
 
 	// Hash routing: when the hash references a card id, try to find it in current results and open details
-useEffect(() => {
+	useEffect(() => {
 		const checkHash = () => {
 			const h = globalThis.location.hash || "";
 			if (h.startsWith("#/card/")) {
 				const id = decodeURIComponent(h.replace("#/card/", ""));
 				const found = results.find((c) => c.id === id);
-				if (found) setSelectedCard(found);
-				else setSelectedCard(null);
+				if (found) {
+					setSelectedCard((prev) => (prev?.id === found.id ? prev : found));
+				} else {
+					setSelectedCard(null);
+				}
 			} else {
 				setSelectedCard(null);
 			}
@@ -100,7 +103,7 @@ useEffect(() => {
 		globalThis.addEventListener("hashchange", checkHash);
 
 		return () => globalThis.removeEventListener("hashchange", checkHash);
-	}, [results]);
+	}, []); // Removed `results` from dependencies
 
 	// Close popup on outside click or Escape
 	useEffect(() => {
@@ -220,7 +223,6 @@ useEffect(() => {
 										<div style={{ color: "#222" }}>
 											<strong>{r.name}</strong>
 										</div>
-										<div style={{ fontSize: 12, color: "#444" }}>{r.id}</div>
 									</button>
 								</li>
 							))}
