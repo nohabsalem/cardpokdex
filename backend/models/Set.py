@@ -1,4 +1,6 @@
 from extensions import db
+
+
 class Set(db.Model):
     id = db.Column(db.String(20), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
