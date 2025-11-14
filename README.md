@@ -21,6 +21,7 @@ Ce projet est une application web permettant de référencer des cartes Pokémon
 git clone https://github.com/ton-utilisateur/nom-du-repo.git
 cd nom-du-repo
 ```
+
 ### 2. Installer les dépendances du frontend
 
 ```
