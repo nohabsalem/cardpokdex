@@ -32,12 +32,12 @@ def home():
 @app.route('/api/cards', methods=['GET'])
 def get_all_cards():
     cards = Card.query.all()
-    return jsonify([card.to_dict() for card in cards]), 200
+    return jsonify({"data": [card.to_dict() for card in cards], "status_code": 200}), 200
 
 @app.route('/api/sets', methods=['GET'])
 def get_all_sets():
     sets = Set.query.all()
-    return jsonify([set_item.to_dict() for set_item in sets]), 200
+    return jsonify({"data": [set_item.to_dict() for set_item in sets], "status_code": 200}), 200
 
 @app.route('/api/card/<string:card_id>', methods=['GET'])
 def get_card_details(card_id):
@@ -48,8 +48,8 @@ def get_card_details(card_id):
     
     # Si la carte n'est pas trouvée, renvoie une erreur 404
     if card is None:
-        return jsonify({"message": f"Carte avec l'ID {card_id} non trouvée"}), 404
-    return jsonify(card.to_dict()), 200
+        return jsonify({"message": f"Carte avec l'ID {card_id} non trouvée", "status_code": 404}), 404
+    return jsonify({"data": card.to_dict(), "status_code": 200}), 200
 
 
 @app.route('/api/search', methods=['GET'])
@@ -80,8 +80,8 @@ def get_set_details(set_id):
     
     # Si le set n'est pas trouvé, renvoie une erreur 404
     if set_item is None:
-        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé"}), 404
-    return jsonify(set_item.to_dict()), 200
+        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé", "status_code": 404}), 404
+    return jsonify({"data": set_item.to_dict(), "status_code": 200}), 200
 
 @app.route('/api/set/<string:set_id>/cards', methods=['GET'])
 def get_cards_by_set(set_id):
@@ -90,11 +90,11 @@ def get_cards_by_set(set_id):
     # Vérifie si le set existe
     set_item = Set.query.get(set_id)
     if set_item is None:
-        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé"}), 404
+        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé", "status_code": 404}), 404
     
     # Récupère toutes les cartes associées à ce set
     cards = Card.query.filter_by(set_id=set_id).all()
-    return jsonify([card.to_dict() for card in cards]), 200
+    return jsonify({"data": [card.to_dict() for card in cards], "status_code": 200}), 200
 
 @app.route('/api/card/add', methods=['POST'])
 def add_card():
@@ -120,13 +120,13 @@ def add_card():
     )
 
     if Set.query.get(data['set_id']) is None:
-        return jsonify({"message": f"Set avec l'ID {data['set_id']} non trouvé"}), 404
+        return jsonify({"message": f"Set avec l'ID {data['set_id']} non trouvé", "status_code": 404}), 404
 
     # Ajoute la nouvelle carte à la session et commit
     db.session.add(new_card)
     db.session.commit()
 
-    return jsonify({"message": "Carte ajoutée avec succès!"}), 201
+    return jsonify({"message": "Carte ajoutée avec succès!", "status_code": 201}), 201
 
 @app.route('/api/set/add', methods=['POST'])
 def add_set():
@@ -137,11 +137,11 @@ def add_set():
     
     # Vérifie si un set avec le même ID existe
     if 'id' in data and Set.query.get(data['id']) is not None:
-        return jsonify({"message": f"Un set avec l'ID {data['id']} existe déjà"}), 409
+        return jsonify({"message": f"Un set avec l'ID {data['id']} existe déjà", "status_code": 409}), 409
 
     # Vérifie si un set avec le même nom existe
     if 'name' in data and Set.query.filter_by(name=data['name']).first() is not None:
-        return jsonify({"message": f"Un set avec le nom '{data['name']}' existe déjà"}), 409
+        return jsonify({"message": f"Un set avec le nom '{data['name']}' existe déjà", "status_code": 409}), 409
 
     # Crée une nouvelle instance de Set avec les données reçues
     new_set = Set(
@@ -157,7 +157,7 @@ def add_set():
     db.session.add(new_set)
     db.session.commit()
 
-    return jsonify({"message": "Set ajouté avec succès!"}), 201
+    return jsonify({"message": "Set ajouté avec succès!", "status_code": 201}), 201
 
 
 @app.route('/api/card/update/<string:card_id>', methods=['PUT'])
@@ -170,7 +170,7 @@ def update_card(card_id):
     # Récupère la carte à mettre à jour
     card = Card.query.get(card_id)
     if card is None:
-        return jsonify({"message": f"Carte avec l'ID {card_id} non trouvée"}), 404
+        return jsonify({"message": f"Carte avec l'ID {card_id} non trouvée", "status_code": 404}), 404
 
     # Met à jour les champs de la carte
     card.name = data.get('name', card.name)
@@ -186,7 +186,7 @@ def update_card(card_id):
 
     # Commit les changements
     db.session.commit()
-    return jsonify({"message": "Carte mise à jour avec succès!"}), 200
+    return jsonify({"message": "Carte mise à jour avec succès!", "status_code": 200}), 200
 
 @app.route('/api/set/update/<string:set_id>', methods=['PUT'])
 def update_set(set_id):
@@ -198,7 +198,7 @@ def update_set(set_id):
     # Récupère le set à mettre à jour
     set_item = Set.query.get(set_id)
     if set_item is None:
-        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé"}), 404
+        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé", "status_code": 404}), 404
 
     # Met à jour les champs du set
     set_item.name = data.get('name', set_item.name)
@@ -209,7 +209,7 @@ def update_set(set_id):
 
     # Commit les changements
     db.session.commit()
-    return jsonify({"message": "Set mis à jour avec succès!"}), 200
+    return jsonify({"message": "Set mis à jour avec succès!", "status_code": 200}), 200
 
 @app.route('/api/card/delete/<string:card_id>', methods=['DELETE'])
 def delete_card(card_id):
@@ -217,12 +217,12 @@ def delete_card(card_id):
     # Récupère la carte à supprimer
     card = Card.query.get(card_id)
     if card is None:
-        return jsonify({"message": f"Carte avec l'ID {card_id} non trouvée"}), 404
+        return jsonify({"message": f"Carte avec l'ID {card_id} non trouvée", "status_code": 404}), 404
 
     # Supprime la carte
     db.session.delete(card)
     db.session.commit()
-    return jsonify({"message": "Carte supprimée avec succès!"}), 200
+    return jsonify({"message": "Carte supprimée avec succès!", "status_code": 200}), 200
 
 @app.route('/api/set/delete/<string:set_id>', methods=['DELETE'])
 def delete_set(set_id):
@@ -230,12 +230,12 @@ def delete_set(set_id):
     # Récupère le set à supprimer
     set_item = Set.query.get(set_id)
     if set_item is None:
-        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé"}), 404
+        return jsonify({"message": f"Set avec l'ID {set_id} non trouvé", "status_code": 404}), 404
 
     # Supprime le set
     db.session.delete(set_item)
     db.session.commit()
-    return jsonify({"message": "Set supprimé avec succès!"}), 200
+    return jsonify({"message": "Set supprimé avec succès!", "status_code": 200}), 200
 
 if __name__ == '__main__':
     # Lance l'application si vous l'exécutez directement avec `python app.py`
