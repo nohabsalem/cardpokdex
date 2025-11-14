@@ -4,6 +4,7 @@ import ApiTest from "./components/ApiTest.jsx";
 import CardImage from "./components/CardImage.jsx";
 import SetImage from "./components/SetImage.jsx";
 import SearchBar from "./components/SearchBar.jsx";
+import SearchResults from "./pages/SearchResults.jsx";
 import SetsList from "./pages/SetsList.jsx";
 import Landing from "./pages/Landing.jsx";
 import SetCards from "./pages/SetCards.jsx";
@@ -32,6 +33,8 @@ export default function App() {
     content = <SetsList navigateTo={navigateTo} />;
   } else if (path === '/' ) {
     content = <Landing navigateTo={navigateTo} />;
+  } else if (path === '/search' || path.startsWith('/search')) {
+    content = <SearchResults navigateTo={navigateTo} />;
   } else if (path.startsWith('/sets/')) {
     const parts = path.split('/');
     const setId = parts[2] || '';

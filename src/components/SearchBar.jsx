@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import CardImage from "./CardImage.jsx";
+import CardDetails from "./CardDetails.jsx";
 
 function SearchBar({
 	endpoint = "/api/search",
@@ -11,13 +11,14 @@ function SearchBar({
 }) {
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState([]);
-	const [selectedCardId, setSelectedCardId] = useState(null);
-	const [loading, setLoading] = useState(false);
+	const [selectedCard, setSelectedCard] = useState(null);
+
 	const [error, setError] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const debounceRef = useRef(null);
 	const abortRef = useRef(null);
+
 	const containerRef = useRef(null);
 
 	// Fetch/search effect (debounced)
@@ -27,14 +28,12 @@ function SearchBar({
 				abortRef.current.abort();
 				abortRef.current = null;
 			}
-			setLoading(false);
 			setError(null);
 			setResults([]);
 			onResults([]);
 			return;
 		}
 
-		setLoading(true);
 		setError(null);
 
 		if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -66,14 +65,12 @@ function SearchBar({
 					});
 				})
 				.then((data) => {
-					setLoading(false);
 					setError(null);
 					setResults(data || []);
 					onResults(data || []);
 				})
 				.catch((err) => {
 					if (err.name === "AbortError") return;
-					setLoading(false);
 					setError(err.message || "Erreur");
 					onResults([]);
 				});
@@ -84,23 +81,26 @@ function SearchBar({
 		};
 	}, [query, endpoint, paramName, minChars, debounceMs, onResults]);
 
-	// Hash routing: open card detail when hash is #/card/<id>
-	useEffect(() => {
-		const hash = globalThis.location.hash || "";
-		if (hash.startsWith("#/card/")) {
-			setSelectedCardId(decodeURIComponent(hash.replace("#/card/", "")));
-		}
-		const onHashChange = () => {
+	// Hash routing: when the hash references a card id, try to find it in current results and open details
+useEffect(() => {
+		const checkHash = () => {
 			const h = globalThis.location.hash || "";
 			if (h.startsWith("#/card/")) {
-				setSelectedCardId(decodeURIComponent(h.replace("#/card/", "")));
+				const id = decodeURIComponent(h.replace("#/card/", ""));
+				const found = results.find((c) => c.id === id);
+				if (found) setSelectedCard(found);
+				else setSelectedCard(null);
 			} else {
-				setSelectedCardId(null);
+				setSelectedCard(null);
 			}
 		};
-		globalThis.addEventListener("hashchange", onHashChange);
-		return () => globalThis.removeEventListener("hashchange", onHashChange);
-	}, []);
+
+		// initial check and listener
+		checkHash();
+		globalThis.addEventListener("hashchange", checkHash);
+
+		return () => globalThis.removeEventListener("hashchange", checkHash);
+	}, [results]);
 
 	// Close popup on outside click or Escape
 	useEffect(() => {
@@ -134,18 +134,39 @@ function SearchBar({
 					aria-label="Search"
 					style={{ padding: "8px 10px", borderRadius: 6, border: "1px solid #ccc", minWidth: 220 }}
 					onFocus={() => setIsOpen(true)}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							e.preventDefault();
+							if (query && query.length >= minChars) {
+								try {
+									window.history.pushState({}, '', `/search?q=${encodeURIComponent(query)}`);
+								} catch (err) {
+									// ignore
+								}
+								// trigger router listener (App listens to popstate)
+								try {
+									window.dispatchEvent(new PopStateEvent('popstate'));
+								} catch (err) {
+									// fallback: reload
+									window.location.href = `/search?q=${encodeURIComponent(query)}`;
+								}
+								// keep the popup open so the results remain visible without extra clicks
+								setIsOpen(true);
+							}
+						}
+					}}
 				/>
-				{loading && (
-					<span aria-live="polite" style={{ fontSize: 12, color: "#666" }}>
-						Chargement...
-					</span>
-				)}
+			</div>
+
+			{/* Erreur affichée sous la barre de recherche (le texte 'Chargement...' a été supprimé) */}
+			<div style={{ marginTop: 6 }}>
 				{error && (
-					<span role="alert" style={{ fontSize: 12, color: "#c00" }}>
+					<div role="alert" style={{ fontSize: 12, color: "#c00" }}>
 						{error}
-					</span>
+					</div>
 				)}
 			</div>
+		
 
 			{/* Popup résultats */}
 			{isOpen && (
@@ -173,22 +194,34 @@ function SearchBar({
 					{results && results.length > 0 ? (
 						<ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
 							{results.slice(0, 50).map((r) => (
-								<li key={r.id} style={{ margin: "6px 0", padding: 6, borderRadius: 6 }}>
-									<a
-										href={`#/card/${encodeURIComponent(r.id)}`}
+								<li key={r.id} style={{ margin: "6px 0", padding: 0, borderRadius: 6 }}>
+									<button
+										type="button"
 										onClick={() => {
+											setSelectedCard(r);
+											setSelectedCardId(r.id);
 											try {
 												globalThis.location.hash = `#/card/${encodeURIComponent(r.id)}`;
 											} catch (e) {
-												globalThis.location.href = `#/card/${encodeURIComponent(r.id)}`;
+												// ignore
 											}
 											setIsOpen(false);
 										}}
-										style={{ color: "#0366d6", textDecoration: "none" }}
+										style={{
+											width: '100%',
+											textAlign: 'left',
+											padding: 6,
+											borderRadius: 6,
+											border: 'none',
+											background: 'transparent',
+											cursor: 'pointer',
+										}}
 									>
-										<strong>{r.name}</strong>
-									</a>
-									<div style={{ fontSize: 12, color: "#444" }}>{r.set_id || r.set}</div>
+										<div style={{ color: "#222" }}>
+											<strong>{r.name}</strong>
+										</div>
+										<div style={{ fontSize: 12, color: "#444" }}>{r.id}</div>
+									</button>
 								</li>
 							))}
 						</ul>
@@ -198,24 +231,23 @@ function SearchBar({
 				</div>
 			)}
 
-			{/* Détail de la carte sélectionnée */}
-			{selectedCardId && (
-				<section style={{ padding: 12, borderTop: "1px solid #eee" }}>
-					<h3>Détail de la carte</h3>
-					<button
-						onClick={() => {
+			{/* Détail de la carte sélectionnée (modal) */}
+			{selectedCard && (
+				<CardDetails
+					card={selectedCard}
+					onClose={() => {
+						setSelectedCard(null);
+						setSelectedCardId(null);
+						try {
 							globalThis.location.hash = "";
-							setSelectedCardId(null);
-						}}
-						style={{ marginBottom: 8 }}
-					>
-						← Retour
-					</button>
-					<CardImage cardId={selectedCardId} />
-				</section>
+						} catch (e) {
+							// ignore
+						}
+					}}
+				/>
 			)}
-		</div>
-	);
+			</div>
+		);
 }
 
 export default SearchBar;
