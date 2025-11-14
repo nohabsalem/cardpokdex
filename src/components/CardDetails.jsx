@@ -72,12 +72,6 @@ function CardModal({ card, onClose }) {
           <div style={{ flex: 1, border: '1px solid #e6e6e6', padding: 20, borderRadius: 8, background: '#fff' }}>
             <h1 style={{ marginTop: 0, marginBottom: 6, fontSize: 26, lineHeight: '1.1', fontWeight: 700 }}>{card.name || '—'}</h1>
 
-            <div style={{ color: '#666', marginBottom: 14, fontSize: 13 }}>
-              <span style={{ marginRight: 12 }}><strong style={{ fontWeight: 600 }}>ID:</strong> {card.id || '—'}</span>
-              <span style={{ marginRight: 12 }}><strong style={{ fontWeight: 600 }}>Set:</strong> {card.set_id || card.set || '—'}</span>
-              <span style={{ marginRight: 12 }}><strong style={{ fontWeight: 600 }}>No.:</strong> {card.number ?? '—'}</span>
-              <span><strong style={{ fontWeight: 600 }}>Supertype:</strong> {card.supertype || '—'}</span>
-            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
@@ -98,12 +92,7 @@ function CardModal({ card, onClose }) {
               </div>
             </div>
 
-            <div style={{ marginTop: 8 }}>
-              <strong style={{ display: 'block', marginBottom: 8 }}>Full data</strong>
-              <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, background: '#f7f7f7', padding: 10, borderRadius: 6, maxHeight: 260, overflow: 'auto' }}>
-                {JSON.stringify(card, null, 2)}
-              </pre>
-            </div>
+            
           </div>
         </div>
       </div>
