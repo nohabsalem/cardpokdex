@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 /**
  * SetsList Page
@@ -15,13 +15,13 @@ export default function SetsList({ navigateTo }) {
     const loadSets = async () => {
       setLoading(true);
       try {
-        const resp = await fetch('http://127.0.0.1:5000/api/sets');
+        const resp = await fetch("http://127.0.0.1:5000/api/sets");
         if (!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
         const data = await resp.json();
         setSets(data || []);
       } catch (err) {
         console.error(err);
-        setError(err.message || 'Erreur lors du chargement des sets');
+        setError(err.message || "Erreur lors du chargement des sets");
       } finally {
         setLoading(false);
       }
@@ -33,7 +33,9 @@ export default function SetsList({ navigateTo }) {
     <div className="p-6 bg-white rounded-lg shadow-md">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Ensembles disponibles</h1>
-        <p className="text-sm text-gray-600">Clique sur un set pour voir toutes ses cartes.</p>
+        <p className="text-sm text-gray-600">
+          Clique sur un set pour voir toutes ses cartes.
+        </p>
       </div>
 
       {loading && <p>Chargement des sets...</p>}
@@ -46,7 +48,7 @@ export default function SetsList({ navigateTo }) {
             onClick={() => {
               // navigate to /sets/:id
               const path = `/sets/${s.id}`;
-              if (typeof navigateTo === 'function') navigateTo(path);
+              if (typeof navigateTo === "function") navigateTo(path);
             }}
             className="bg-white rounded-lg p-4 flex flex-col items-center hover:shadow-md transition"
             aria-label={`Voir le set ${s.name}`}
@@ -54,8 +56,11 @@ export default function SetsList({ navigateTo }) {
             <img
               src={s.logo}
               alt={`${s.name} logo`}
-              className="max-h-28 object-contain mb-3"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/200x80?text=Logo+indisponible'; }}
+              className="max-h-28 object-contain mb-3 cursor-pointer"
+              onError={(e) => {
+                e.target.src =
+                  "https://via.placeholder.com/200x80?text=Logo+indisponible";
+              }}
             />
             <div className="text-center">
               <div className="font-semibold text-gray-800">{s.name}</div>

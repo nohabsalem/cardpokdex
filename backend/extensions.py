@@ -1,3 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
 
+# Shared SQLAlchemy instance for the app and models
 db = SQLAlchemy()

@@ -1,6 +1,5 @@
+
 from extensions import db
-
-
 class Card(db.Model):
     id = db.Column(db.String(512), primary_key=True) 
     name = db.Column(db.String(512))

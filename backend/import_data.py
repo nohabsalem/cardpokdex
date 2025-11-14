@@ -144,4 +144,5 @@ def import_sql_data():
 
 
 if __name__ == '__main__':
+    # Placez votre fichier cardpokdex.sql dans le même dossier que ce script
     import_sql_data()
