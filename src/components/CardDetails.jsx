@@ -32,7 +32,7 @@ function CardModal({ card, onClose }) {
     >
       <div
         style={{
-          background: '#fff',
+          background: 'transparent',
           borderRadius: 8,
           maxWidth: 960,
           width: '100%',
@@ -59,36 +59,40 @@ function CardModal({ card, onClose }) {
           ×
         </button>
 
-        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-          <div style={{ flex: '0 0 320px' }}>
+        <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+          <div style={{ flex: '0 0 420px', marginRight: 8 }}>
             <img
               src={card.large}
               alt={`Carte ${card.name}`}
-              style={{ width: '100%', height: 'auto', borderRadius: 6 }}
-              onError={(e) => (e.target.src = 'https://via.placeholder.com/300x400?text=Image+indisponible')}
+              style={{ width: '100%', height: 'auto', borderRadius: 8, boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}
+              onError={(e) => (e.target.src = 'https://via.placeholder.com/420x560?text=Image+indisponible')}
             />
           </div>
 
-          <div style={{ flex: 1 }}>
-            <h2 style={{ marginTop: 0 }}>{card.name}</h2>
-            <div style={{ color: '#555', marginBottom: 12 }}>
-              <strong>Set:</strong> {card.set_id || card.set}
-              {' — '}
-              <strong>Rarity:</strong> {card.rarity || '—'}
+          <div style={{ flex: 1, border: '1px solid #e6e6e6', padding: 20, borderRadius: 8, background: '#fff' }}>
+            <h1 style={{ marginTop: 0, marginBottom: 6, fontSize: 26, lineHeight: '1.1', fontWeight: 700 }}>{card.name || '—'}</h1>
+
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div>
+                <div style={{ color: '#444', fontSize: 14 }}><strong>Types</strong></div>
+                <div style={{ color: '#222' }}>{card.types || '—'}</div>
+              </div>
+              <div>
+                <div style={{ color: '#444', fontSize: 14 }}><strong>Rarity</strong></div>
+                <div style={{ color: '#222' }}>{card.rarity || '—'}</div>
+              </div>
+              <div>
+                <div style={{ color: '#444', fontSize: 14 }}><strong>Artist</strong></div>
+                <div style={{ color: '#222' }}>{card.artist || '—'}</div>
+              </div>
+              <div>
+                <div style={{ color: '#444', fontSize: 14 }}><strong>Flavor</strong></div>
+                <div style={{ color: '#333', fontStyle: 'italic' }}>{card.flavorText || '—'}</div>
+              </div>
             </div>
 
-            <div style={{ marginBottom: 12 }}>
-              <strong>Types:</strong> {card.types || '—'}
-            </div>
-
-            <div style={{ marginBottom: 12 }}>
-              <strong>Artist:</strong> {card.artist || '—'}
-            </div>
-
-            {card.flavorText && (
-              <div style={{ marginBottom: 12, fontStyle: 'italic', color: '#333' }}>{card.flavorText}</div>
-            )}
-
+            
           </div>
         </div>
       </div>
