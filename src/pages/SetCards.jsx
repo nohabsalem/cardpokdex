@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ImageModal from '../components/ImageModal';
+import CardDetails from '../components/CardDetails.jsx';
 
 /**
  * SetCards Page
@@ -13,9 +13,7 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedAlt, setSelectedAlt] = useState('');
+  const [selectedCard, setSelectedCard] = useState(null);
   const [setName, setSetName] = useState('');
   const API = 'http://127.0.0.1:5000/api';
 
@@ -103,25 +101,30 @@ export default function SetCards({ initialSetId = 'rsv10pt5', setId: propSetId, 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {cards.map((c) => (
           <div key={c.id} className="flex justify-center">
-            <img
-              src={c.small || c.large}
-              alt={c.name}
-              className="w-full h-auto rounded-lg shadow-sm hover:shadow-md transition-transform hover:scale-105 cursor-pointer"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/240x320?text=Image+indisponible'; }}
+            <button
+              type="button"
               onClick={() => {
-                // open modal with the large image if available
-                const large = c.large || c.small;
-                setSelectedImage(large);
-                setSelectedAlt(c.name || c.id);
-                setModalOpen(true);
+                // open card details modal with full card data
+                setSelectedCard(c);
                 console.log(`SetCards: clicked ${c.id}`);
               }}
-            />
+              style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', width: '100%' }}
+            >
+              <img
+                src={c.small || c.large}
+                alt={c.name}
+                style={{ width: '100%', maxWidth: 320, height: 'auto', borderRadius: 8 }}
+                className="shadow-sm hover:shadow-md transition-transform hover:scale-105"
+                onError={(e) => { e.target.src = 'https://via.placeholder.com/320x426?text=Image+indisponible'; }}
+              />
+            </button>
           </div>
         ))}
       </div>
 
-      <ImageModal open={modalOpen} src={selectedImage} alt={selectedAlt} onClose={() => setModalOpen(false)} />
+      {selectedCard && (
+        <CardDetails card={selectedCard} onClose={() => setSelectedCard(null)} />
+      )}
     </div>
   );
 }
